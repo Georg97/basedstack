@@ -135,7 +135,7 @@
 </script>
 
 <svelte:head>
-	<title>dabsstack — Build your stack, your way</title>
+	<title>basedstack — Build your stack, your way</title>
 	<meta name="description" content="A modern web development stack built with SvelteKit, Tailwind CSS v4, and shadcn-svelte." />
 </svelte:head>
 
@@ -147,7 +147,7 @@
 				<div class="from-amber to-terracotta flex size-7 items-center justify-center rounded-lg bg-gradient-to-br sm:size-8">
 					<Layers class="text-primary-foreground size-3.5 sm:size-4" />
 				</div>
-				<span class="group-hover:text-amber transition-colors">dabs</span><span class="text-muted-foreground">stack</span>
+				<span class="group-hover:text-amber transition-colors">based</span><span class="text-muted-foreground">stack</span>
 			</a>
 
 			<div class="flex items-center gap-1.5 sm:gap-2">
@@ -160,7 +160,7 @@
 					</Tooltip.Trigger>
 					<Tooltip.Content>Toggle visual effects</Tooltip.Content>
 				</Tooltip.Root>
-				<Button variant="ghost" size="sm" href="https://github.com/Georg97/dabsstack" target="_blank" class="text-muted-foreground hover:text-foreground size-8 p-0 sm:size-auto sm:p-2">
+				<Button variant="ghost" size="sm" href="https://github.com/Georg97/basedstack" target="_blank" class="text-muted-foreground hover:text-foreground size-8 p-0 sm:size-auto sm:p-2">
 					<Github class="size-4" />
 				</Button>
 				{#if data.user}
@@ -269,7 +269,7 @@
 						<Button
 							variant="outline"
 							size="lg"
-							href="https://github.com/Georg97/dabsstack"
+							href="https://github.com/Georg97/basedstack"
 							target="_blank"
 							class="border-white/10 text-base hover:border-white/20 hover:bg-white/[0.04]"
 						>
@@ -805,7 +805,7 @@
 				<Button
 					size="lg"
 					class="from-amber via-copper to-terracotta text-primary-foreground border-0 bg-gradient-to-r px-8 text-base hover:opacity-90"
-					href="https://github.com/Georg97/dabsstack"
+					href="https://github.com/Georg97/basedstack"
 					target="_blank"
 				>
 					<Github class="mr-2 size-4" />
@@ -826,7 +826,7 @@
 				<div class="from-amber/40 to-terracotta/40 flex size-5 items-center justify-center rounded bg-gradient-to-br">
 					<Layers class="text-muted-foreground size-3" />
 				</div>
-				<span>dabsstack</span>
+				<span>basedstack</span>
 			</div>
 			<p class="text-muted-foreground/40 text-xs">Built with SvelteKit, Tailwind & shadcn-svelte</p>
 		</div>
