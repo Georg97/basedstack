@@ -1,0 +1,22 @@
+# Local Postgres for development. `docker compose up -d` and you have a database.
+# The same image runs fine on a single VPS or home server for self-hosting.
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: basedstack
+      POSTGRES_PASSWORD: basedstack
+      POSTGRES_DB: basedstack
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U basedstack']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

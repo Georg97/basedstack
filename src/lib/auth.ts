@@ -7,7 +7,7 @@ import { getRequestEvent } from "$app/server";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "sqlite",
+        provider: "pg",
         schema,
     }),
     baseURL: process.env.BETTER_AUTH_URL,
