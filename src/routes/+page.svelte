@@ -36,6 +36,7 @@
 	import { getTags, liveMessages, sendMessage } from './data.remote';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import Chat from '$lib/ai/Chat.svelte';
 
 	let copied = $state(false);
 	let showEffects = $state(true);
@@ -46,6 +47,7 @@
 		{ id: 'stack', label: 'Stack' },
 		{ id: 'features', label: 'Features' },
 		{ id: 'queries', label: 'Queries' },
+		{ id: 'ai', label: 'Local AI' },
 		{ id: 'forms', label: 'Forms' },
 		{ id: 'cta', label: 'Get Started' }
 	];
@@ -669,6 +671,57 @@
 					</Card.CardContent>
 				</Card.Card>
 			</div>
+		</div>
+	</section>
+
+	<!-- ========== AI SEPARATOR ========== -->
+	<div class="mx-auto max-w-6xl px-6 lg:px-8">
+		<div class="relative flex items-center py-4">
+			<Separator class="flex-1 bg-white/[0.06]" />
+			<span class="text-muted-foreground/50 mx-4 shrink-0 text-[10px] font-medium tracking-[0.2em] uppercase">Local AI</span>
+			<Separator class="flex-1 bg-white/[0.06]" />
+		</div>
+	</div>
+
+	<!-- ========== AI SECTION ========== -->
+	<section id="ai" class="relative mx-auto max-w-6xl px-6 py-24 lg:px-8">
+		{#if showEffects}
+			<div class="pointer-events-none absolute top-1/3 right-0 size-[400px] -translate-y-1/2 rounded-full opacity-[0.05] blur-[100px]" style="background: var(--amber);"></div>
+		{/if}
+
+		<div class="relative grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+			<!-- Left: explanation -->
+			<div class="lg:sticky lg:top-24">
+				<Badge class="border-amber/20 bg-amber/10 text-amber mb-4">
+					<Cpu class="mr-1 size-3" />
+					On-device AI
+				</Badge>
+				<h2 class="text-3xl font-bold tracking-tight sm:text-4xl" style="font-family: var(--font-display);">
+					AI that never leaves <span class="text-muted-foreground italic">the device</span>
+				</h2>
+				<p class="text-muted-foreground mt-4 text-lg leading-relaxed">
+					The model runs in your browser on the GPU via WebGPU/WebLLM — no API keys, no server
+					round-trip, nothing sent anywhere. Pick a model, it downloads once and is cached, then you
+					chat. Private and GDPR-friendly by construction, with escalation to external providers on the roadmap.
+				</p>
+				<div class="mt-6 space-y-3">
+					{#each ['Runs locally on WebGPU — private by default', 'Curated, up-to-date models (Qwen3.5, Ministral-3, gemma3)', 'Weights cached after the first download', 'Composable — one chat widget over a shared engine'] as feature}
+						<div class="text-muted-foreground flex items-center gap-2.5 text-sm">
+							<div class="bg-amber/10 flex size-5 items-center justify-center rounded-full">
+								<Check class="text-amber size-3" />
+							</div>
+							{feature}
+						</div>
+					{/each}
+				</div>
+				<Button href="/ai" variant="outline" class="hover:border-amber/20 hover:bg-amber/[0.04] mt-7 border-white/10">
+					Open the full page
+					<ArrowRight class="ml-1.5 size-4" />
+				</Button>
+			</div>
+
+			<!-- Right: inline chat over the shared engine -->
+			<Chat />
 		</div>
 	</section>
 
