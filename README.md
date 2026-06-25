@@ -13,9 +13,18 @@ A simple, self-hostable SvelteKit stack with realtime built in — no extra serv
 
 - [x] Postgres + realtime (`query.live` over `LISTEN`/`NOTIFY`)
 - [x] On-device AI chat (in-browser, WebGPU / WebLLM)
-- [ ] First-class GDPR compliance (data export & erasure, consent, ROPA) — _in progress_
+- [ ] First-class GDPR compliance — _in progress_
+  - [x] Registry-driven data export & account erasure + self-service dashboard ([`/account/privacy`](src/routes/account/privacy))
+  - [x] Legal pages from config + registry: privacy policy & imprint ([`/legal`](src/routes/legal))
+  - [x] Record of Processing Activities (ROPA) generated from the data registry ([`docs/ropa.md`](docs/ropa.md))
+  - [x] `/gdpr` skill (init / add-table / audit / ropa) to set up & maintain compliance
+  - [ ] Consent management + banner, with a gate for external-AI escalation
+  - [ ] Retention jobs (purge expired sessions/exports, soft-deleted accounts)
+  - [ ] Scaffolder ships projects GDPR-ready (clean `.claude` from `scaffold/`)
 - [ ] Escalate to external AI providers (opt-in, e.g. AI SDK)
 - [ ] MCP support
+- [ ] i18n support
+- [ ] s3 support with seaweedfs (extend docker-compose for this)
 - [ ] Realtime hardening (DB-trigger `NOTIFY`, live-query auth scoping)
 
 ## Getting started
