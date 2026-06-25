@@ -39,7 +39,7 @@
 				if (error) {
 					toast.error(error.message || 'Sign up failed');
 				} else {
-					toast.success('Account created!', { description: 'Welcome to dabsstack.' });
+					toast.success('Account created!', { description: 'Welcome to basedstack.' });
 				}
 			} else {
 				const { error } = await authClient.signIn.email({
@@ -78,7 +78,7 @@
 </script>
 
 <svelte:head>
-	<title>{mode === 'signin' ? 'Sign In' : 'Sign Up'} — dabsstack</title>
+	<title>{mode === 'signin' ? 'Sign In' : 'Sign Up'} — basedstack</title>
 </svelte:head>
 
 <div class="grain relative flex min-h-screen">
@@ -121,7 +121,7 @@
 					<Layers class="size-5 text-white" />
 				</div>
 				<span class="text-xl font-semibold tracking-tight">
-					<span class="group-hover:text-amber transition-colors">dabs</span><span class="text-muted-foreground">stack</span>
+					<span class="group-hover:text-amber transition-colors">based</span><span class="text-muted-foreground">stack</span>
 				</span>
 			</a>
 
@@ -164,7 +164,7 @@
 				<Layers class="size-4.5 text-white" />
 			</div>
 			<span class="text-lg font-semibold tracking-tight">
-				<span>dabs</span><span class="text-muted-foreground">stack</span>
+				<span>based</span><span class="text-muted-foreground">stack</span>
 			</span>
 		</a>
 
@@ -185,7 +185,7 @@
 					{#if mode === 'signin'}
 						Sign in to continue to your dashboard.
 					{:else}
-						Get started with dabsstack in seconds.
+						Get started with basedstack in seconds.
 					{/if}
 				</p>
 			</div>
@@ -322,7 +322,8 @@
 
 			<!-- Terms -->
 			<p class="text-muted-foreground/30 mt-6 text-center text-[11px] leading-relaxed">
-				By continuing, you agree to our Terms of Service and Privacy Policy.
+				By continuing, you agree to our Terms of Service and
+				<a href="/legal/privacy" class="hover:text-muted-foreground underline transition-colors">Privacy Policy</a>.
 			</p>
 		</div>
 	</div>

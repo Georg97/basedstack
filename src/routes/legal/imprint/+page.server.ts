@@ -1,0 +1,9 @@
+import { gdprConfig, isConfigured } from "$lib/gdpr/config";
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async () => {
+  return {
+    config: gdprConfig,
+    configured: isConfigured(),
+  };
+};

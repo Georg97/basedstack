@@ -24,7 +24,6 @@
 	import Mail from '@lucide/svelte/icons/mail';
 	import Palette from '@lucide/svelte/icons/palette';
 	import Radio from '@lucide/svelte/icons/radio';
-	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import Send from '@lucide/svelte/icons/send';
 	import Server from '@lucide/svelte/icons/server';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
@@ -34,9 +33,10 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { toast } from 'svelte-sonner';
 	import { authClient } from '$lib/auth-client';
-	import { getRandomMsg, getTags } from './data.remote';
+	import { getTags, liveMessages, sendMessage } from './data.remote';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import Chat from '$lib/ai/Chat.svelte';
 
 	let copied = $state(false);
 	let showEffects = $state(true);
@@ -47,6 +47,7 @@
 		{ id: 'stack', label: 'Stack' },
 		{ id: 'features', label: 'Features' },
 		{ id: 'queries', label: 'Queries' },
+		{ id: 'ai', label: 'Local AI' },
 		{ id: 'forms', label: 'Forms' },
 		{ id: 'cta', label: 'Get Started' }
 	];
@@ -87,7 +88,15 @@
 		}
 	});
 
-	var randomQuery = getRandomMsg();
+	const chat = liveMessages();
+	let draft = $state('');
+
+	async function send() {
+		const text = draft.trim();
+		if (!text) return;
+		draft = '';
+		await sendMessage(text);
+	}
 
 	function copyCommand() {
 		navigator.clipboard.writeText('bunx sv create --template minimal .');
@@ -128,7 +137,7 @@
 </script>
 
 <svelte:head>
-	<title>dabsstack — Build your stack, your way</title>
+	<title>basedstack — Build your stack, your way</title>
 	<meta name="description" content="A modern web development stack built with SvelteKit, Tailwind CSS v4, and shadcn-svelte." />
 </svelte:head>
 
@@ -140,7 +149,7 @@
 				<div class="from-amber to-terracotta flex size-7 items-center justify-center rounded-lg bg-gradient-to-br sm:size-8">
 					<Layers class="text-primary-foreground size-3.5 sm:size-4" />
 				</div>
-				<span class="group-hover:text-amber transition-colors">dabs</span><span class="text-muted-foreground">stack</span>
+				<span class="group-hover:text-amber transition-colors">based</span><span class="text-muted-foreground">stack</span>
 			</a>
 
 			<div class="flex items-center gap-1.5 sm:gap-2">
@@ -153,7 +162,7 @@
 					</Tooltip.Trigger>
 					<Tooltip.Content>Toggle visual effects</Tooltip.Content>
 				</Tooltip.Root>
-				<Button variant="ghost" size="sm" href="https://github.com/Georg97/dabsstack" target="_blank" class="text-muted-foreground hover:text-foreground size-8 p-0 sm:size-auto sm:p-2">
+				<Button variant="ghost" size="sm" href="https://github.com/Georg97/basedstack" target="_blank" class="text-muted-foreground hover:text-foreground size-8 p-0 sm:size-auto sm:p-2">
 					<Github class="size-4" />
 				</Button>
 				{#if data.user}
@@ -262,7 +271,7 @@
 						<Button
 							variant="outline"
 							size="lg"
-							href="https://github.com/Georg97/dabsstack"
+							href="https://github.com/Georg97/basedstack"
 							target="_blank"
 							class="border-white/10 text-base hover:border-white/20 hover:bg-white/[0.04]"
 						>
@@ -553,13 +562,13 @@
 			<div class="mb-14 max-w-xl">
 				<Badge class="border-terracotta/20 bg-terracotta/10 text-terracotta mb-4">
 					<Radio class="mr-1 size-3" />
-					Remote Queries
+					Realtime
 				</Badge>
 				<h2 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl" style="font-family: var(--font-display);">
-					Server meets <span class="text-muted-foreground italic">client</span>
+					Live, with just <span class="text-muted-foreground italic">Postgres</span>
 				</h2>
 				<p class="text-muted-foreground mt-4 text-lg leading-relaxed">
-					SvelteKit's remote queries let you call server functions directly from components. Data flows seamlessly with built-in loading and error states.
+					A <code class="text-amber font-mono text-base">query.live</code> streams over Postgres LISTEN/NOTIFY — no extra services. Send a message below, then open this page in a second tab and watch it appear in both, instantly.
 				</p>
 			</div>
 
@@ -593,7 +602,7 @@
 					</Card.CardContent>
 				</Card.Card>
 
-				<!-- Client: getRandomMsg() -->
+				<!-- Realtime: liveMessages() + sendMessage() -->
 				<Card.Card class="group bg-card/50 hover:border-terracotta/20 hover:bg-card/70 overflow-hidden border-white/[0.06] backdrop-blur-sm transition-all duration-500">
 					<Card.CardHeader class="p-6 pb-4">
 						<div class="flex items-center justify-between">
@@ -602,47 +611,117 @@
 									<Radio class="text-terracotta size-5" />
 								</div>
 								<div>
-									<Card.CardTitle class="text-base" style="font-family: var(--font-display);">Runtime Query</Card.CardTitle>
-									<p class="text-muted-foreground mt-0.5 font-mono text-xs">getRandomMsg()</p>
+									<Card.CardTitle class="text-base" style="font-family: var(--font-display);">Live Messages</Card.CardTitle>
+									<p class="text-muted-foreground mt-0.5 font-mono text-xs">query.live</p>
 								</div>
 							</div>
-							<Badge variant="outline" class="border-terracotta/20 text-terracotta text-xs">Client</Badge>
+							{#if chat.connected}
+								<Badge variant="outline" class="border-green-400/20 text-xs text-green-400/80">
+									<span class="mr-1.5 inline-block size-1.5 animate-pulse rounded-full bg-green-400"></span>
+									Live
+								</Badge>
+							{:else}
+								<Badge variant="outline" class="text-muted-foreground border-white/10 text-xs">Connecting…</Badge>
+							{/if}
 						</div>
 					</Card.CardHeader>
 					<Card.CardContent class="p-6 pt-0">
-						<p class="text-muted-foreground mb-4 text-sm">Called at runtime with reactive loading & error states. Errors are simulated randomly.</p>
 						<div class="bg-secondary/30 rounded-lg border border-white/[0.06] p-4">
-							<p class="text-muted-foreground/60 mb-2.5 text-xs tracking-wider uppercase">Response</p>
-							<div class="flex min-h-[2.5rem] items-center">
-								{#if randomQuery?.error}
+							<p class="text-muted-foreground/60 mb-2.5 text-xs tracking-wider uppercase">Stream</p>
+							<div class="flex max-h-44 min-h-[5rem] flex-col gap-2 overflow-y-auto">
+								{#if chat.error}
 									<div class="text-destructive flex items-center gap-2">
 										<AlertCircle class="size-4 shrink-0" />
-										<span class="text-sm">Error — randomly simulated failure</span>
+										<span class="text-sm">Stream error — check the server connection</span>
 									</div>
-								{:else if randomQuery?.loading}
+								{:else if chat.current === undefined}
 									<div class="text-muted-foreground flex items-center gap-2">
 										<Loader class="size-4 animate-spin" />
-										<span class="text-sm">Loading...</span>
+										<span class="text-sm">Connecting…</span>
 									</div>
+								{:else if chat.current.length === 0}
+									<p class="text-muted-foreground/60 text-sm">No messages yet — send the first one.</p>
 								{:else}
-									<p class="text-foreground text-sm">{randomQuery?.current}</p>
+									{#each chat.current as msg (msg.id)}
+										<div class="text-sm">
+											<span class="text-amber font-medium">{msg.author}</span>
+											<span class="text-foreground">{msg.text}</span>
+										</div>
+									{/each}
 								{/if}
 							</div>
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							class="hover:border-terracotta/20 hover:text-terracotta mt-4 border-white/10"
-							onclick={() => {
-								randomQuery.refresh();
+						<form
+							class="mt-4 flex gap-2"
+							onsubmit={(e) => {
+								e.preventDefault();
+								send();
 							}}
 						>
-							<RefreshCw class="mr-1.5 size-3.5" />
-							Refresh
-						</Button>
+							<Input
+								bind:value={draft}
+								placeholder="Type a message…"
+								maxlength={500}
+								class="bg-secondary/30 placeholder:text-muted-foreground/40 focus:border-terracotta/30 focus:ring-terracotta/20 border-white/[0.06]"
+							/>
+							<Button type="submit" disabled={!draft.trim()} class="from-terracotta to-copper text-primary-foreground border-0 bg-gradient-to-r hover:opacity-90">
+								<Send class="size-3.5" />
+							</Button>
+						</form>
 					</Card.CardContent>
 				</Card.Card>
 			</div>
+		</div>
+	</section>
+
+	<!-- ========== AI SEPARATOR ========== -->
+	<div class="mx-auto max-w-6xl px-6 lg:px-8">
+		<div class="relative flex items-center py-4">
+			<Separator class="flex-1 bg-white/[0.06]" />
+			<span class="text-muted-foreground/50 mx-4 shrink-0 text-[10px] font-medium tracking-[0.2em] uppercase">Local AI</span>
+			<Separator class="flex-1 bg-white/[0.06]" />
+		</div>
+	</div>
+
+	<!-- ========== AI SECTION ========== -->
+	<section id="ai" class="relative mx-auto max-w-6xl px-6 py-24 lg:px-8">
+		{#if showEffects}
+			<div class="pointer-events-none absolute top-1/3 right-0 size-[400px] -translate-y-1/2 rounded-full opacity-[0.05] blur-[100px]" style="background: var(--amber);"></div>
+		{/if}
+
+		<div class="relative grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+			<!-- Left: explanation -->
+			<div class="lg:sticky lg:top-24">
+				<Badge class="border-amber/20 bg-amber/10 text-amber mb-4">
+					<Cpu class="mr-1 size-3" />
+					On-device AI
+				</Badge>
+				<h2 class="text-3xl font-bold tracking-tight sm:text-4xl" style="font-family: var(--font-display);">
+					AI that never leaves <span class="text-muted-foreground italic">the device</span>
+				</h2>
+				<p class="text-muted-foreground mt-4 text-lg leading-relaxed">
+					The model runs in your browser on the GPU via WebGPU/WebLLM — no API keys, no server
+					round-trip, nothing sent anywhere. Pick a model, it downloads once and is cached, then you
+					chat. Private and GDPR-friendly by construction, with escalation to external providers on the roadmap.
+				</p>
+				<div class="mt-6 space-y-3">
+					{#each ['Runs locally on WebGPU — private by default', 'Curated, up-to-date models (Qwen3.5, Ministral-3, gemma3)', 'Weights cached after the first download', 'Composable — one chat widget over a shared engine'] as feature}
+						<div class="text-muted-foreground flex items-center gap-2.5 text-sm">
+							<div class="bg-amber/10 flex size-5 items-center justify-center rounded-full">
+								<Check class="text-amber size-3" />
+							</div>
+							{feature}
+						</div>
+					{/each}
+				</div>
+				<Button href="/ai" variant="outline" class="hover:border-amber/20 hover:bg-amber/[0.04] mt-7 border-white/10">
+					Open the full page
+					<ArrowRight class="ml-1.5 size-4" />
+				</Button>
+			</div>
+
+			<!-- Right: inline chat over the shared engine -->
+			<Chat />
 		</div>
 	</section>
 
@@ -779,7 +858,7 @@
 				<Button
 					size="lg"
 					class="from-amber via-copper to-terracotta text-primary-foreground border-0 bg-gradient-to-r px-8 text-base hover:opacity-90"
-					href="https://github.com/Georg97/dabsstack"
+					href="https://github.com/Georg97/basedstack"
 					target="_blank"
 				>
 					<Github class="mr-2 size-4" />
@@ -795,13 +874,18 @@
 
 	<!-- ========== FOOTER ========== -->
 	<footer class="border-t border-white/[0.04]">
-		<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 lg:px-8">
+		<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row lg:px-8">
 			<div class="text-muted-foreground/60 flex items-center gap-2 text-sm">
 				<div class="from-amber/40 to-terracotta/40 flex size-5 items-center justify-center rounded bg-gradient-to-br">
 					<Layers class="text-muted-foreground size-3" />
 				</div>
-				<span>dabsstack</span>
+				<span>basedstack</span>
 			</div>
+			<nav class="text-muted-foreground/60 flex items-center gap-5 text-xs">
+				<a href="/legal/privacy" class="hover:text-foreground transition-colors">Privacy</a>
+				<a href="/legal/imprint" class="hover:text-foreground transition-colors">Imprint</a>
+				<a href="/account/privacy" class="hover:text-foreground transition-colors">Your data</a>
+			</nav>
 			<p class="text-muted-foreground/40 text-xs">Built with SvelteKit, Tailwind & shadcn-svelte</p>
 		</div>
 	</footer>
