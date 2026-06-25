@@ -107,3 +107,7 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// GDPR workstream tables (owned by docs/manifest.md › gdpr). Defined in a separate
+// file to avoid edit collisions; re-exported here so drizzle-kit migrations see them.
+export * from "./gdpr.schema";
