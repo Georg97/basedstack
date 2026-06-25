@@ -821,13 +821,18 @@
 
 	<!-- ========== FOOTER ========== -->
 	<footer class="border-t border-white/[0.04]">
-		<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 lg:px-8">
+		<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row lg:px-8">
 			<div class="text-muted-foreground/60 flex items-center gap-2 text-sm">
 				<div class="from-amber/40 to-terracotta/40 flex size-5 items-center justify-center rounded bg-gradient-to-br">
 					<Layers class="text-muted-foreground size-3" />
 				</div>
 				<span>basedstack</span>
 			</div>
+			<nav class="text-muted-foreground/60 flex items-center gap-5 text-xs">
+				<a href="/legal/privacy" class="hover:text-foreground transition-colors">Privacy</a>
+				<a href="/legal/imprint" class="hover:text-foreground transition-colors">Imprint</a>
+				<a href="/account/privacy" class="hover:text-foreground transition-colors">Your data</a>
+			</nav>
 			<p class="text-muted-foreground/40 text-xs">Built with SvelteKit, Tailwind & shadcn-svelte</p>
 		</div>
 	</footer>

@@ -322,7 +322,8 @@
 
 			<!-- Terms -->
 			<p class="text-muted-foreground/30 mt-6 text-center text-[11px] leading-relaxed">
-				By continuing, you agree to our Terms of Service and Privacy Policy.
+				By continuing, you agree to our Terms of Service and
+				<a href="/legal/privacy" class="hover:text-muted-foreground underline transition-colors">Privacy Policy</a>.
 			</p>
 		</div>
 	</div>

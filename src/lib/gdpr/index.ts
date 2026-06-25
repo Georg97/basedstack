@@ -11,6 +11,19 @@ export type {
 } from "./registry";
 export { exportUserData, type DataExport } from "./export";
 export { eraseUserData } from "./erase";
+export {
+  gdprConfig,
+  isConfigured,
+  isPlaceholder,
+  type GdprConfig,
+  type SubProcessor,
+} from "./config";
+export {
+  generateRopa,
+  ropaToMarkdown,
+  type Ropa,
+  type RopaActivity,
+} from "./ropa";
 export { audit, type AuditInput } from "./audit";
 export { pseudonym } from "./pseudonymize";
 export {

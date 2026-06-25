@@ -123,19 +123,31 @@ Status: ⬜ todo · 🟡 in progress · ✅ done · 🚧 blocked
 - ⬜ `requireConsent('ai-external')` gate for external AI escalation
 - ⬜ Consent write/withdraw wired to the `consent` table + audit log
 
-### Phase 3 — Legal templates + ROPA (next pass)
-- ⬜ `/legal/privacy` (templated MDX) and `/legal/imprint` (Impressum)
-- ⬜ ROPA generator reading `purpose`/`lawfulBasis`/`retention` from the registry
-- ⬜ Sub-processor registry (feeds policy + ROPA; tied to AI providers)
+### Phase 3 — Legal templates + ROPA ✅ done
+- ✅ `src/lib/gdpr/config.ts` — controller/org config (single source for legal pages + ROPA)
+- ✅ `src/lib/gdpr/ropa.ts` + `scripts/gdpr-ropa.ts` — ROPA generated from registry + config
+- ✅ `docs/ropa.md` — generated Record of Processing Activities
+- ✅ `/legal/privacy` — policy rendered from config + the registry's processing table
+- ✅ `/legal/imprint` — Impressum rendered from config
+- ✅ Sub-processor registry in config (feeds policy + ROPA + international-transfer detection)
+- ✅ Footer + login links to the legal pages (transparency / easy accessibility)
 
 ### Phase 4 — Retention jobs (next pass)
 - ⬜ In-process scheduled purge of expired sessions, verifications, export artifacts
 - ⬜ Grace-period purge of soft-deleted accounts
 
-### Phase 5 — The GDPR skill (next pass)
-- ⬜ `.claude/skills/gdpr/` — `/gdpr init`, `add-table`, `audit`, `ropa`
-- ⬜ Questionnaire → fills policy/imprint/ROPA + seeds registry
+### Phase 5 — The GDPR skill ✅ done
+- ✅ `scaffold/.claude/skills/gdpr/SKILL.md` — `init`, `add-table`, `audit`, `ropa`
+- ✅ `init` interviews the user → fills config → regenerates policy/imprint/ROPA
+- ✅ Lives under `scaffold/` (the clean project template), **not** this repo's dev
+  `.claude/` — it's a tool for *using* the stack, not *developing* it. Phase 6 promotes it.
 
 ### Phase 6 — Scaffolder wiring (`create-basedstack`)
-- ⬜ Repoint `giget` source `dabsstack` → `basedstack`; rename package
-- ⬜ Stop blanket-deleting `.claude/`; keep the GDPR skill + CLAUDE.md/AGENTS.md
+Decision (per maintainer): **construct a clean `.claude` for generated projects from the
+`scaffold/` template — do NOT ship this repo's dev `.claude`/manifest.** The dev tooling is
+bound to *developing* the stack; a generated project needs project-facing assets only.
+- ⬜ Repoint `giget` source `dabsstack` → `basedstack`; rename package `create-dabsstack` → `create-basedstack`
+- ⬜ Promote `scaffold/.claude` → `.claude` in the new project, then delete `scaffold/`
+- ⬜ Strip dev-only material from the generated project: `docs/manifest.md`, and swap the
+  dev `CLAUDE.md`/`AGENTS.md` for clean project-facing versions (add those under `scaffold/`)
+- ⬜ Keep the existing `.claude`-removal step for the dev repo's own (untracked) `.claude`
