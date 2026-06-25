@@ -76,6 +76,19 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+// Demo table for the realtime showcase: messages stream live to every client
+// via query.live + Postgres LISTEN/NOTIFY. See src/routes/data.remote.ts.
+export const messages = pgTable(
+  "messages",
+  {
+    id: text("id").primaryKey(),
+    author: text("author").notNull(),
+    text: text("text").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("messages_created_at_idx").on(table.createdAt)],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),

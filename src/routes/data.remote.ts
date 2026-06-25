@@ -1,32 +1,45 @@
-import { query } from '$app/server';
+import { query, command, getRequestEvent } from '$app/server';
+import { desc } from 'drizzle-orm';
+import { z } from 'zod';
+import { db } from '../index';
+import { messages } from '../db/schema';
+import { subscribe, notify } from '$lib/server/realtime';
 
-const chat_messages = [
-    "Hello, how are you?",
-    "I'm doing great, thanks for asking!",
-    "What's new with you?",
-    "Just working on some code",
-    "That sounds interesting",
-    "Yeah, it's a TypeScript project",
-    "Nice! I love TypeScript",
-    "Me too, it's very helpful",
-    "Absolutely, type safety is key",
-    "kk"
-]
+const MESSAGES_CHANNEL = 'messages';
 
+// Simple SSR demo: resolved on the server before the page renders.
 export const getTags = query(async () => {
-    console.log("called");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-	return ["Bana", "Chero", "Tama", "Hana"];
+	return ['Postgres', 'LISTEN/NOTIFY', 'query.live', 'SvelteKit'];
 });
 
-export const getRandomMsg = query(async () => {
-    for (let i = 0; i < 1000000000; i++) {
-        // simulate heavy computation
-    }
-    const i = Math.floor(Math.random() * chat_messages.length);
-    const control = Math.floor(Math.random() * chat_messages.length);
-    if (i === control) {
-        throw new Error("Random error occurred!");
-    }
-    return chat_messages[i];
-})
+async function recentMessages() {
+	const rows = await db
+		.select()
+		.from(messages)
+		.orderBy(desc(messages.createdAt))
+		.limit(20);
+	// newest-first from the DB, oldest-first for a chat transcript
+	return rows.reverse();
+}
+
+// Realtime query: yields the current messages, then re-yields whenever a
+// NOTIFY fires on the channel. Every connected client shares one server-side
+// stream, so a single write fans out to all of them.
+export const liveMessages = query.live(async function* () {
+	const { request } = getRequestEvent();
+	yield await recentMessages();
+	for await (const _ of subscribe(MESSAGES_CHANNEL, { signal: request.signal })) {
+		yield await recentMessages();
+	}
+});
+
+// Mutation: insert a row, then NOTIFY so every liveMessages stream refreshes.
+export const sendMessage = command(z.string().trim().min(1).max(500), async (text) => {
+	const { locals } = getRequestEvent();
+	await db.insert(messages).values({
+		id: crypto.randomUUID(),
+		author: locals.user?.name ?? 'anon',
+		text
+	});
+	await notify(MESSAGES_CHANNEL);
+});

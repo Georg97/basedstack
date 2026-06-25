@@ -24,7 +24,6 @@
 	import Mail from '@lucide/svelte/icons/mail';
 	import Palette from '@lucide/svelte/icons/palette';
 	import Radio from '@lucide/svelte/icons/radio';
-	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import Send from '@lucide/svelte/icons/send';
 	import Server from '@lucide/svelte/icons/server';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
@@ -34,7 +33,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { toast } from 'svelte-sonner';
 	import { authClient } from '$lib/auth-client';
-	import { getRandomMsg, getTags } from './data.remote';
+	import { getTags, liveMessages, sendMessage } from './data.remote';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
@@ -87,7 +86,15 @@
 		}
 	});
 
-	var randomQuery = getRandomMsg();
+	const chat = liveMessages();
+	let draft = $state('');
+
+	async function send() {
+		const text = draft.trim();
+		if (!text) return;
+		draft = '';
+		await sendMessage(text);
+	}
 
 	function copyCommand() {
 		navigator.clipboard.writeText('bunx sv create --template minimal .');
@@ -553,13 +560,13 @@
 			<div class="mb-14 max-w-xl">
 				<Badge class="border-terracotta/20 bg-terracotta/10 text-terracotta mb-4">
 					<Radio class="mr-1 size-3" />
-					Remote Queries
+					Realtime
 				</Badge>
 				<h2 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl" style="font-family: var(--font-display);">
-					Server meets <span class="text-muted-foreground italic">client</span>
+					Live, with just <span class="text-muted-foreground italic">Postgres</span>
 				</h2>
 				<p class="text-muted-foreground mt-4 text-lg leading-relaxed">
-					SvelteKit's remote queries let you call server functions directly from components. Data flows seamlessly with built-in loading and error states.
+					A <code class="text-amber font-mono text-base">query.live</code> streams over Postgres LISTEN/NOTIFY — no extra services. Send a message below, then open this page in a second tab and watch it appear in both, instantly.
 				</p>
 			</div>
 
@@ -593,7 +600,7 @@
 					</Card.CardContent>
 				</Card.Card>
 
-				<!-- Client: getRandomMsg() -->
+				<!-- Realtime: liveMessages() + sendMessage() -->
 				<Card.Card class="group bg-card/50 hover:border-terracotta/20 hover:bg-card/70 overflow-hidden border-white/[0.06] backdrop-blur-sm transition-all duration-500">
 					<Card.CardHeader class="p-6 pb-4">
 						<div class="flex items-center justify-between">
@@ -602,44 +609,63 @@
 									<Radio class="text-terracotta size-5" />
 								</div>
 								<div>
-									<Card.CardTitle class="text-base" style="font-family: var(--font-display);">Runtime Query</Card.CardTitle>
-									<p class="text-muted-foreground mt-0.5 font-mono text-xs">getRandomMsg()</p>
+									<Card.CardTitle class="text-base" style="font-family: var(--font-display);">Live Messages</Card.CardTitle>
+									<p class="text-muted-foreground mt-0.5 font-mono text-xs">query.live</p>
 								</div>
 							</div>
-							<Badge variant="outline" class="border-terracotta/20 text-terracotta text-xs">Client</Badge>
+							{#if chat.connected}
+								<Badge variant="outline" class="border-green-400/20 text-xs text-green-400/80">
+									<span class="mr-1.5 inline-block size-1.5 animate-pulse rounded-full bg-green-400"></span>
+									Live
+								</Badge>
+							{:else}
+								<Badge variant="outline" class="text-muted-foreground border-white/10 text-xs">Connecting…</Badge>
+							{/if}
 						</div>
 					</Card.CardHeader>
 					<Card.CardContent class="p-6 pt-0">
-						<p class="text-muted-foreground mb-4 text-sm">Called at runtime with reactive loading & error states. Errors are simulated randomly.</p>
 						<div class="bg-secondary/30 rounded-lg border border-white/[0.06] p-4">
-							<p class="text-muted-foreground/60 mb-2.5 text-xs tracking-wider uppercase">Response</p>
-							<div class="flex min-h-[2.5rem] items-center">
-								{#if randomQuery?.error}
+							<p class="text-muted-foreground/60 mb-2.5 text-xs tracking-wider uppercase">Stream</p>
+							<div class="flex max-h-44 min-h-[5rem] flex-col gap-2 overflow-y-auto">
+								{#if chat.error}
 									<div class="text-destructive flex items-center gap-2">
 										<AlertCircle class="size-4 shrink-0" />
-										<span class="text-sm">Error — randomly simulated failure</span>
+										<span class="text-sm">Stream error — check the server connection</span>
 									</div>
-								{:else if randomQuery?.loading}
+								{:else if chat.current === undefined}
 									<div class="text-muted-foreground flex items-center gap-2">
 										<Loader class="size-4 animate-spin" />
-										<span class="text-sm">Loading...</span>
+										<span class="text-sm">Connecting…</span>
 									</div>
+								{:else if chat.current.length === 0}
+									<p class="text-muted-foreground/60 text-sm">No messages yet — send the first one.</p>
 								{:else}
-									<p class="text-foreground text-sm">{randomQuery?.current}</p>
+									{#each chat.current as msg (msg.id)}
+										<div class="text-sm">
+											<span class="text-amber font-medium">{msg.author}</span>
+											<span class="text-foreground">{msg.text}</span>
+										</div>
+									{/each}
 								{/if}
 							</div>
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							class="hover:border-terracotta/20 hover:text-terracotta mt-4 border-white/10"
-							onclick={() => {
-								randomQuery.refresh();
+						<form
+							class="mt-4 flex gap-2"
+							onsubmit={(e) => {
+								e.preventDefault();
+								send();
 							}}
 						>
-							<RefreshCw class="mr-1.5 size-3.5" />
-							Refresh
-						</Button>
+							<Input
+								bind:value={draft}
+								placeholder="Type a message…"
+								maxlength={500}
+								class="bg-secondary/30 placeholder:text-muted-foreground/40 focus:border-terracotta/30 focus:ring-terracotta/20 border-white/[0.06]"
+							/>
+							<Button type="submit" disabled={!draft.trim()} class="from-terracotta to-copper text-primary-foreground border-0 bg-gradient-to-r hover:opacity-90">
+								<Send class="size-3.5" />
+							</Button>
+						</form>
 					</Card.CardContent>
 				</Card.Card>
 			</div>
