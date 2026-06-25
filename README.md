@@ -9,6 +9,15 @@ A simple, self-hostable SvelteKit stack with realtime built in — no extra serv
 - **SuperForms** + **Zod**
 - **adapter-node** — runs anywhere a Node process can: a single VPS or a home server
 
+## Roadmap
+
+- [x] Postgres + realtime (`query.live` over `LISTEN`/`NOTIFY`)
+- [x] On-device AI chat (in-browser, WebGPU / WebLLM)
+- [ ] First-class GDPR compliance (data export & erasure, consent, ROPA) — _in progress_
+- [ ] Escalate to external AI providers (opt-in, e.g. AI SDK)
+- [ ] MCP support
+- [ ] Realtime hardening (DB-trigger `NOTIFY`, live-query auth scoping)
+
 ## Getting started
 
 ```sh
@@ -47,6 +56,14 @@ point `DATABASE_URL` at Postgres directly — not at a transaction-mode pooler �
 keep the Node server long-running (hence adapter-node).
 
 See the landing page's "Realtime" section for a working live-chat demo.
+
+## Local AI
+
+A chat that runs entirely in the browser — no API keys, nothing leaves the device.
+WebLLM (WebGPU) downloads a curated, quality-ordered model (Qwen3.5 / Ministral-3 /
+gemma3-1b; weights cached after the first load) and streams replies. The page is
+[`/ai`](src/routes/ai/+page.svelte) and the engine lives in
+[`src/lib/ai/`](src/lib/ai/). Needs a WebGPU browser (recent desktop Chrome/Edge).
 
 ## Testing
 
